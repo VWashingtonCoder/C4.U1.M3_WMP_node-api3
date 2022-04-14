@@ -28,9 +28,9 @@ function validateUserId(req, res, next) {
 function validateUser(req, res, next) {
   // DO YOUR MAGIC
   if(!req.body.name){
-    res.status(404).json({ message: "missing required name field" });
+    res.status(400).json({ message: "missing required name field" });
     return;
-  }
+  };
   
   req.userName = { name: req.body.name.trim() };
   next();
@@ -38,6 +38,13 @@ function validateUser(req, res, next) {
 
 function validatePost(req, res, next) {
   // DO YOUR MAGIC
+  if(!req.body.text){
+    res.status(400).json({ message: "missing required text field" });
+    return;
+  };
+
+  req.post = req.body.text.trim();
+  next();
 }
 
 // do not forget to expose these functions to other modules

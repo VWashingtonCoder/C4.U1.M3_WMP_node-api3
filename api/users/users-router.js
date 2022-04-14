@@ -1,7 +1,7 @@
 const express = require('express');
 const Users = require('./users-model');
 const Posts = require('../posts/posts-model');
-const { validateUserId, validateUser } = require('../middleware/middleware')
+const { validateUserId, validateUser, validatePost } = require('../middleware/middleware')
 // You will need `users-model.js` and `posts-model.js` both
 // The middleware functions also need to be required
 
@@ -70,15 +70,34 @@ router.delete('/:id', validateUserId, (req, res, next) => {
     })
 });
 
-router.get('/:id/posts', (req, res) => {
+router.get('/:id/posts', validateUserId, (req, res, next) => {
   // RETURN THE ARRAY OF USER POSTS
   // this needs a middleware to verify user id
+  Users.getUserPosts(req.user.id)
+    .then(posts => {
+      res.status(200).json(posts)
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({ message: "User posts could not be retrieved" })
+    })
 });
 
-router.post('/:id/posts', (req, res) => {
+router.post('/:id/posts', validateUserId, validatePost, (req, res, next) => {
   // RETURN THE NEWLY CREATED USER POST
   // this needs a middleware to verify user id
   // and another middleware to check that the request body is valid
+  const newPost = { text: req.post, user_id: req.user.id }
+
+  Posts.insert(newPost)
+    .then(post => {
+      res.status(201).json(post)
+    })
+    .catch(err => {
+      console.log(err)
+      res.status(500).json({ message: "User post could not be added" })
+    })
+  
 });
 
 // do not forget to export the router
